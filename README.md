@@ -1,31 +1,61 @@
 # SMH (Synthetic Multimodal Hierarchy)
 
-Synthetic Multimodal Hierarchy (SMH) is a Python-based transit analysis framework that models and infers the structural hierarchy of urban public transportation systems. By processing geospatial district data and simulating "trip chains," the system identifies how different transit modes (walking, bus, subway, etc.) form functional hierarchies in a city.
+**Repository title:** SMH (Synthetic Multimodal Hierarchy)  
+**Study title:** Identifying Public Transit Multimodal Hierarchy Using Artificially Generated Trip Chains
 
-This repository contains the official codebase implementing the methodology from the study:
- ### “Identifying Public Transit Multimodal Hierarchy Using Artificially Generated Trip Chains”
+SMH provides the Stage I implementation for generating and pre-processing synthetic multimodal itineraries that feed a broader framework for quantifying urban transit hierarchies.
 
-## Overview
+## Abstract
 
-This project processes city district boundaries to:
-1. Generate random points within districts
-2. Create origin-destination (OD) pairs based on population and area products
-3. Fetch transit routes from Google Maps API
-4. Simplify and analyze route transitions
-5. Generate statistics on transportation mode transitions
+Establishing a clear hierarchical structure of public transit modes is fundamental to integrated urban planning and functional network analysis. Higher-tier modes exhibit lower spatial accessibility but greater mobility efficiency, enabling longer travel within fixed time budgets. Prior work in South Korea identified an “ascending–descending” travel pattern using empirical multimodal itineraries, yet many cities lack access to such granular data because of privacy and institutional constraints.
 
-The analysis produces insights into how people transition between different transportation modes (walking, subway, bus, etc.) during transit journeys, split into ascending (first half) and descending (second half) segments of trips.
+This study introduces a methodology to quantify macroscopic urban transit hierarchies using synthetic multimodal itineraries generated via the Google Maps Directions API. By segmenting itineraries into directional phases and analyzing intermodal transfers, we derive mode-specific hierarchy scores. Validation against Seoul smart card data shows simulated hierarchies (Walking < Local Bus < Urban Bus < Metro) align with observed behavior. Applications in Amsterdam and Brisbane demonstrate adaptability and scalability where empirical data are scarce.
 
-## Features
+## Methodology Overview
 
-- **Geospatial Processing**: Uses GeoPandas and Shapely for district boundary analysis
-- **Google Maps Integration**: Fetches real transit routes via Google Maps Directions API
-- **Route Simplification**: Merges consecutive segments and handles walking segments intelligently
-- **Transition Analysis**: Counts mode transitions separately for ascending and descending route segments
-- **Configurable**: Centralized configuration via `config.py` and environment variables
-- **Portable**: No hardcoded paths, works across different operating systems
+The research employs a two-stage pipeline that converts raw spatial data into quantified modal hierarchy scores, implemented across five primary scripts.
 
-## Installation
+### Stage I: Synthetic Itinerary Generation
+- **Spatial-temporal sampling:** Construct origin–destination pairs.  
+- **Data retrieval:** Extract multimodal routes via a public routing API (Google Maps Directions API).  
+- **Repository scope:** This codebase delivers Phase 1 (data acquisition and pre-processing).
+
+### Stage II: Hierarchy Quantification
+- **Temporal segmentation:** Bisect each trip into ascending and descending phases at the temporal midpoint.  
+- **Transfer matrix construction:** Capture directional transitions between modes in each phase.  
+- **Scoring:** Compute pairwise hierarchical differences and aggregate them into normalized scores in the \[0, 1\] range.
+
+*For conceptual schematics and transfer logic, see Figures 1–3 in the manuscript.*
+
+### Target cities and inputs
+- **Pre-processing (common):** From GIS data (SHP/GeoJSON), remove parks, green areas, and waterways to retain only the serviceable area.  
+- **Weights:** Population and land-use area.  
+- **Tools:** Scripts 1–5 (this repository) plus the Google Maps Directions API.
+
+### Seoul (deep dive, four scenarios)
+- **S1 – Empirical / Empirical:** Empirical OD + empirical itineraries.  
+- **S2 – Empirical / Artificial:** Empirical OD + API-generated itineraries.  
+- **S3 – Artificial (Population) / Artificial:** Population-based synthetic OD + API itineraries.  
+- **S4 – Artificial (Land Use) / Artificial:** Land-use-based synthetic OD + API itineraries.
+
+### Amsterdam & Brisbane (case studies)
+- **Input:** GIS plus population and land-use indicators.  
+- **Process:** (1) Generate synthetic OD pairs; (2) collect API-based itineraries.  
+- **Goal:** Demonstrate hierarchy analysis where only synthetic data are available.
+
+## Repository Scope and Pipeline
+
+This repository focuses on generating OD pairs and fetching, simplifying, and structuring itineraries; downstream hierarchy scoring is described in the paper but not implemented here.
+
+1. **1_points_generation.ipynb** — Generate random points within districts and build OD pairs.  
+2. **2_raw_trip.py** — Fetch multimodal routes via Google Maps Directions API for each OD pair.  
+3. **3_simplified_trip.py** — Merge consecutive segments and simplify walking segments.  
+4. **4_ascending_descending.py** — Split each trip into ascending and descending phases at the midpoint.  
+5. **5_transfer_counting.py** — Count mode transitions separately for ascending and descending segments.
+
+Primary outputs: `random_od_pairs.csv`, `trip2.csv`, `trip3.csv`, `trip4.csv`, `final.csv`.
+
+## Installation and Setup
 
 ### Prerequisites
 
@@ -228,9 +258,9 @@ You can also modify `config.py` directly, but using environment variables is rec
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ Stage 1: Points Generation (1_points_generation.ipynb)          │
+│ Stage 1: Points Generation (1_points_generation.ipynb)         │
 │                                                                 │
-│ Input:  City district GeoJSON (pre/Amsterdam.geojson)           │
+│ Input:  City district GeoJSON (pre/Amsterdam.geojson)          │
 │ Output: Random points, OD pairs                                 │
 │         - random_points.geojson                                 │
 │         - random_points.csv                                     │
@@ -361,4 +391,14 @@ If processing large numbers of OD pairs:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+## Acknowledgments
 
+- Google Maps Platform for transit route data
+- GeoPandas and Shapely communities for geospatial tools
+- OpenStreetMap for network analysis capabilities
+
+## Notes and Cautions
+
+- Keep API keys out of version control; `.gitignore` excludes sensitive files.  
+- Large OD sets may require batching or reduced `NUM_RANDOM_POINTS`.  
+- Figures referenced in the paper provide visual details for the hierarchy concept and transfer logic.
