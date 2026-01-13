@@ -142,7 +142,7 @@ python 3_simplified_trip.py
 
 **Example transformation:**
 - Input: `walking(5분) -> bus(15분) -> walking(3분) -> subway(20분) -> walking(2분)`
-- Output: `walking(5분) -> bus(15분) -> subway(20분) -> walking(2분)`
+- Output: `walking(5분) -> bus(18분) -> subway(20분) -> walking(2분)`
 
 ### Stage 4: Ascending/Descending Split
 
