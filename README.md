@@ -89,9 +89,13 @@ pip install -r requirements.txt
 
 3. Optionally configure other settings (see [Configuration](#configuration) section)
 
-### Step 4: Prepare Input Data
+### Step 4: Prepare Input Data (Manual Action Required)
 
-Place your city district GeoJSON file in the `pre/` directory. The file should contain:
+Before running the pipeline, you must manually set up the input directory:
+Create a folder named pre/ in the project root.
+Place your city district GeoJSON file (e.g., Amsterdam.geojson) inside the pre/ directory.
+
+The file should contain:
 - District boundaries as polygons
 - A `layer` column with district names
 - A `population` column with population values
